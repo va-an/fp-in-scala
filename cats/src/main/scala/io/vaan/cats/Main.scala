@@ -1,4 +1,4 @@
-package io.vaan
+package io.vaan.cats
 
 import cats.instances.string._
 import cats.syntax.semigroup._
