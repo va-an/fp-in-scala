@@ -8,10 +8,12 @@ scalaVersion := "2.13.1"
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
 lazy val catsCore = "org.typelevel" %% "cats-core" % "2.3.1"
+lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.0" % Test
 
 lazy val cats = (project in file("cats"))
   .settings(
-    libraryDependencies += catsCore
+    libraryDependencies += catsCore,
+    libraryDependencies += scalaTest
   )
 
 lazy val root = (project in file("."))
