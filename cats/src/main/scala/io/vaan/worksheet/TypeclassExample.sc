@@ -4,8 +4,7 @@ trait Num[A] {
   def minus(x: A, y: A): A
 }
 
-// instances
-object NumInstances {
+object Num {
   implicit val IntNum: Num[Int] = new Num[Int] {
     override def plus(x: Int, y: Int): Int = x + y
     override def minus(x: Int, y: Int): Int = x - y
@@ -25,7 +24,6 @@ object NumSyntax {
   }
 }
 
-import NumInstances._
 import NumSyntax._
 
 1 plus 2
