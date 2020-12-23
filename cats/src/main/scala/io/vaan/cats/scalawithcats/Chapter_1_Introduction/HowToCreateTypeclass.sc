@@ -7,7 +7,7 @@ trait Printable[A] {
   def format(a: A): String
 }
 
-// interface object
+// interface objects
 object Printable {
   def format[A](input: A)(implicit p: Printable[A]): String =
     p.format(input)

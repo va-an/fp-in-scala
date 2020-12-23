@@ -15,6 +15,12 @@ object Num {
     override def plus(x: Double, y: Double): Double = x + y
     override def minus(x: Double, y: Double): Double = x - y
   }
+
+  def plus[A](x: A, y: A)(implicit num: Num[A]): A =
+    num.plus(x, y)
+
+  def minus[A](x: A, y: A)(implicit num: Num[A]): A =
+    num.minus(x, y)
 }
 
 // interface syntax
@@ -27,8 +33,13 @@ object NumSyntax {
 
 import NumSyntax._
 
+// interface syntax
 1 plus 2
 3.5 minus 0.4
+
+// interface objects
+Num.plus(1, 2)
+Num.minus(3.5, 0.4)
 
 // insert new type class instance into implicit scope
 implicit val optionIntNum: Num[Option[Int]] = new Num[Option[Int]] {
@@ -44,6 +55,7 @@ import cats.implicits._
 
 // here we go again
 3.some plus 4.some minus 5.some
+Num.plus(1.some, 2.some)
 
 // TODO
 //    how to make instance for every A in F[A]?
