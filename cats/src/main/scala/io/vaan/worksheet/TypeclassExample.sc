@@ -42,12 +42,12 @@ Num.plus(1, 2)
 Num.minus(3.5, 0.4)
 
 // insert new type class instance into implicit scope
-implicit val optionIntNum: Num[Option[Int]] = new Num[Option[Int]] {
-  override def plus(x: Option[Int], y: Option[Int]): Option[Int] =
-    x flatMap { xv => y map (yv => xv + yv) }
+implicit def optionIntNum[A](implicit n: Num[A]): Num[Option[A]] = new Num[Option[A]] {
+  override def plus(x: Option[A], y: Option[A]): Option[A] =
+    x flatMap { xv => y map (yv => Num.plus(xv, yv)) }
 
-  override def minus(x: Option[Int], y: Option[Int]): Option[Int] =
-    x flatMap { xv => y map (yv => xv - yv) }
+  override def minus(x: Option[A], y: Option[A]): Option[A] =
+    x flatMap { xv => y map (yv => Num.minus(xv, yv)) }
 }
 
 // for ".some"
@@ -57,7 +57,8 @@ import cats.implicits._
 3.some plus 4.some minus 5.some
 Num.plus(1.some, 2.some)
 
-// TODO
-//    how to make instance for every A in F[A]?
-//    recursive implicit resolution!
-//    make it baby
+// we can do it for every A in F[A], which have type class instance
+3.4.some plus 2.1.some
+3.4.some minus none[Double]
+none[Double] plus 0.12.some
+none[Int] plus none[Int]
