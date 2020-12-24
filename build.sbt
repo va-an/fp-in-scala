@@ -1,7 +1,7 @@
 name := "fp-in-scala"
 version := "0.0.1-SNAPSHOT"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.4"
 
 // scalac options come from the sbt-tpolecat plugin so need to set any here
 
