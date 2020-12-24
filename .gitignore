@@ -18,3 +18,4 @@ project.vim
 .vscode
 metals.sbt
 .bsp
+.ammonite
