@@ -3,8 +3,13 @@ import io.vaan.datatype.Cat
 // https://www.scalawithcats.com/dist/scala-with-cats.html#exercise-printable-library
 
 // typeclass
-trait Printable[A] {
+trait Printable[A] { self =>
   def format(a: A): String
+
+  def contramap[B](f: B => A): Printable[B] =
+    new Printable[B] {
+      def format(a: B): String = self.format(f(a))
+    }
 }
 
 // interface objects
@@ -49,3 +54,15 @@ Printable.print(barsik)
 
 barsik.format
 barsik.print()
+
+// contravariant example
+final case class Box[A](value: A)
+
+implicit def boxPrintable[A](implicit p: Printable[A]): Printable[Box[A]] = 
+  p.contramap(_.value)
+
+Printable.format(Box(4))
+Printable.format(Box(barsik))
+
+Box(4).format
+Box(barsik).format
