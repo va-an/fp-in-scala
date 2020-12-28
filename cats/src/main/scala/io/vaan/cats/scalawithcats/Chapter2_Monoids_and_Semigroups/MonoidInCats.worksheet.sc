@@ -1,4 +1,3 @@
-import io.vaan.datatype.Cat
 import cats.{Monoid, Semigroup}
 import cats.implicits._
 

@@ -5,7 +5,7 @@ scalaVersion := "2.13.4"
 
 // scalac options come from the sbt-tpolecat plugin so need to set any here
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full)
 
 lazy val catsCore = "org.typelevel" %% "cats-core" % "2.3.1"
 lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.2" % Test
