@@ -23,11 +23,10 @@ Await.result(future, 1 second)
 
 // monads, son
 def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
-    a.flatMap(aValue => 
-        b.map(bValue => 
-            aValue * aValue + bValue * bValue
-        )
-    )
+    for {
+        aValue <- a
+        bValue <- b
+    } yield aValue * aValue + bValue * bValue
 
 sumSquare(3.some, 4.some)
 sumSquare(List(1, 2, 3), List(3, 4))
