@@ -1,4 +1,4 @@
-import cats.Monad
+import cats.{Monad, Id}
 import cats.implicits._
 import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
@@ -30,3 +30,19 @@ def sumSquare[F[_]: Monad](a: F[Int], b: F[Int]): F[Int] =
 
 sumSquare(3.some, 4.some)
 sumSquare(List(1, 2, 3), List(3, 4))
+
+// id monad
+sumSquare(3: Id[Int], 4: Id[Int])
+
+"meow": Id[String]
+1: Id[Int]
+List(1, 2, 3): Id[List[Int]]
+
+// Id is truly monad
+val a = Monad[Id].pure(4)
+val b = Monad[Id].flatMap(a)(x => x * x)
+
+for {
+    aa <- a
+    bb <- b
+} yield a + b
