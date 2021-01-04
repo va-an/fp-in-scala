@@ -1,4 +1,5 @@
 import cats.data.State
+import cats.implicits._
 
 val a = State[Int, String] { state =>
   (state, s"state: $state")
@@ -66,27 +67,28 @@ z.run(4).value
 type CalcState[A] = State[List[Int], A]
 
 def evalOne(sym: String): CalcState[Int] = {
-  if (sym.forall(_.isDigit)) {
-    val digit = sym.toInt
-    State.modify[List[Int]](stack => stack :+ digit).map(_ => digit) // FIXME: appending to end of list, meh
-  } else {
-      State[List[Int], Int] { stack => 
-        val last = stack.last
-        val lastLast = stack(stack.size - 2)
-        
-        val result = sym match {
-          case "+" => lastLast + last
-          case "-" => lastLast - last
-          case "/" => lastLast / last
-          case "*" => lastLast * last
-        }
-
-        val newStack = stack.slice(0, stack.size - 2) :+ result
-
-        (newStack, result)
-      }
+  def operand(num: Int): CalcState[Int] =
+    State[List[Int], Int] { stack =>
+      (num :: stack, num)
     }
-  } 
+
+  def operator(func: (Int, Int) => Int): CalcState[Int] =
+    State[List[Int], Int] {
+      case b :: a :: tail =>
+        val ans = func(a, b)
+        (ans :: tail, ans)
+      case _ =>
+        sys.error("Fail!")
+    }
+
+  sym match {
+    case "+" => operator(_ + _)
+    case "-" => operator(_ - _)
+    case "*" => operator(_ * _)
+    case "/" => operator(_ / _)
+    case num => operand(num.toInt)
+  }
+}
 
 evalOne("4").run(List.empty).value
 evalOne("+").run(List(1, 2, 3)).value
@@ -103,7 +105,7 @@ evalOne("*").run(List(1, 2, 3)).value
   .value
 
 def evalAll(input: List[String]): CalcState[Int] = 
-  input.foldLeft(State.pure[List[Int], Int](0)) { (state, sym) => 
+  input.foldLeft(0.pure[CalcState]) { (state, sym) => 
     state.flatMap(_ => evalOne(sym))
   }
 
@@ -119,9 +121,9 @@ evalAll(List("1", "2", "+", "3", "*"))
   .runA(List.empty)
   .value
 
-def evalInput(input: List[String]): Int =
-  evalAll(input)
-  .runA(List.empty)
-  .value
+def evalInput(input: String): Int =
+  evalAll(input.split(" ").toList)
+    .runA(List.empty)
+    .value
 
-evalInput(List("1", "2", "+", "3", "*"))
+evalInput("1 2 + 3 *")
