@@ -18,33 +18,40 @@ object BoundedSemiLattice {
   }
 }
 
-final case class GCounter[A](counters: Map[String, A])(implicit m: BoundedSemiLattice[A]) {
-  def increment(host: String, amount: A): GCounter[A] = {
-    val value = amount |+| counters.getOrElse(host, m.empty)
-    GCounter(counters + (host -> value))
-  }
+trait GCounter[F[_,_],K, V] {
+  def increment(f: F[K, V])(k: K, v: V)
+        (implicit m: CommutativeMonoid[V]): F[K, V]
 
-  def merge(that: GCounter[A]): GCounter[A] = 
-    GCounter(this.counters |+| that.counters)
-   
-  def total: A = 
-    m.combineAll(counters.values)
+  def merge(f1: F[K, V], f2: F[K, V])
+        (implicit b: BoundedSemiLattice[V]): F[K, V]
+
+  def total(f: F[K, V])
+        (implicit m: CommutativeMonoid[V]): V
 }
 
-// gcounter
-val v0i = GCounter(Map("A" -> 0, "B" -> 0, "C" -> 0))
-val v1i = v0i.increment("A", 3)
-val v2i = v1i.increment("B", 4)
+object GCounter {
+  def apply[F[_,_], K, V]
+        (implicit counter: GCounter[F, K, V]) =
+    counter
 
-val v3i = v2i.merge(GCounter(Map("A" -> 7, "B" -> 2, "C" -> 0)))
+  implicit def mapGCounter[K, V] = new GCounter[Map, K, V] {
+    def increment(map: Map[K,V])(k: K, v: V)(implicit m: CommutativeMonoid[V]): Map[K,V] = {
+      val value = v |+| map.getOrElse(k, m.empty)
+      map + (k -> v)
+    }
+  
+    def merge(map1: Map[K,V], map2: Map[K,V])(implicit b: BoundedSemiLattice[V]): Map[K,V] = 
+      map1 |+| map2
+    
+    def total(map: Map[K,V])(implicit m: CommutativeMonoid[V]): V = 
+      m.combineAll(map.values)
+  }
+}
 
-v3i.total
+val g1 = Map("a" -> 7, "b" -> 3)
+val g2 = Map("a" -> 2, "b" -> 5)
 
-// gset
-val v0s = GCounter(Map("A" -> Set.empty[Int], "B" -> Set.empty[Int], "C" -> Set.empty[Int]))
-val v1s = v0s.increment("A", Set(1, 2))
-val v2s = v1s.increment("B", Set(3, 4))
+val counter = GCounter[Map, String, Int]
 
-val v3s = v2s.merge(GCounter(Map("A" -> Set(2, 3), "B" -> Set(3), "C" -> Set.empty[Int])))
-
-v3s.total
+val merged = counter.merge(g1, g2)
+val total  = counter.total(merged)
